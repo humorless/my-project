@@ -1,0 +1,15 @@
+{:my-project.db/db
+ {:jdbc-url #profile {:default "jdbc:sqlite:db/my-project.sqlite"
+                      :test "jdbc:sqlite::memory:"}}
+
+ :my-project.server/server
+ {:options {:port #profile {:default 8000
+                            :prod 80
+                            :test #free-port true}
+            :session-secret-key #profile {:default "test-secret-key"
+                                          :prod #env SESSION_SECRET_KEY}
+            :auto-reload? #profile {:default false
+                                    :dev true}
+            :cache-assets? #profile {:default false
+                                     :prod true}}
+  :db #ig/ref :my-project.db/db}}
