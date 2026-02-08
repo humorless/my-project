@@ -41,6 +41,8 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 
 **Database:** `db.clj` provides `exec!` and `exec-one!` helpers that use HoneySQL for query building and next.jdbc for execution. Results are returned as unqualified kebab-case maps.
 
+**Dev hot-reload:** In dev mode, `wrap-reload` in `server.clj` re-creates the Reitit router from the `my-project.routes/routes` var on every request. This means editing handler/route source files takes effect immediately — no server restart needed. You can also use `alter-var-root` on the routes var via nREPL/brepl for live changes (nREPL port is in `.nrepl-port`).
+
 **Dev REPL workflow** (`dev/user.clj`): `(reset)` to start/restart system, `(stop)` to halt, `(run-all-tests)` to run tests from REPL. To run a single test namespace: `(eftest/run-tests (eftest/find-tests 'my-project.home-test) {:report eftest-report/report})`.
 
 **Testing:** Tests in `test/` use `integrant-extras.tests/with-system` fixture to boot a test system. `test-utils.clj` provides helpers: `with-truncated-tables` cleans DB between tests, `response->hickory` parses HTML responses for assertions.
