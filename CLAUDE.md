@@ -47,6 +47,14 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 
 **Testing:** Tests in `test/` use `integrant-extras.tests/with-system` fixture to boot a test system. `test-utils.clj` provides helpers: `with-truncated-tables` cleans DB between tests, `response->hickory` parses HTML responses for assertions.
 
+## Dev Workflow
+
+- The nREPL is usually running during development. Prefer using brepl to verify changes — reload the namespace and call the handler directly to confirm behavior.
+- After editing source files, use brepl to `require` the changed namespace with `:reload` and test interactively, rather than relying solely on `curl` or `bb test`.
+- **Debugging** — When investigating a bug, use brepl to explore state before modifying code: check `*e` for the last exception, call functions directly to inspect return values and data shapes, query the DB with `(db/exec! ds ...)`, and inspect the Integrant system via `integrant.repl.state/system`.
+- **Exploration** — When working with unfamiliar code, use brepl to call `(doc fn-name)`, `(source fn-name)`, or invoke functions directly to understand behavior, rather than relying only on reading source files.
+- **Live system operations** — Use brepl for tasks like inserting test data, running migrations, or checking connection pool status against the running dev system.
+
 ## Code Style
 
 - Formatting: cljfmt with `{:parallel? true, :sort-ns-references? true, :function-arguments-indentation :cursive}` (see `.cljfmt.edn`)
