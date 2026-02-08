@@ -55,6 +55,13 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 - **Exploration** — When working with unfamiliar code, use brepl to call `(doc fn-name)`, `(source fn-name)`, or invoke functions directly to understand behavior, rather than relying only on reading source files.
 - **Live system operations** — Use brepl for tasks like inserting test data, running migrations, or checking connection pool status against the running dev system.
 
+### Balanced REPL Exploration (Token Optimization)
+
+- **Incremental Inspection** — Always start with low-token queries: use `(keys ...)` to see structure, `(count ...)` for size, or `(take 5 ...)` for samples. 
+- **Escalation Path** — If sampling is insufficient to diagnose the issue, you are encouraged to retrieve specific nested data or full objects, but do so purposefully (e.g., `(get-in ...)`).
+- **Efficient Debugging** — Start with `(ex-message *e)` and `(ex-data *e)`. Only dump a truncated stack trace with `(clojure.repl/pst 10)` if the root cause remains hidden.
+- **State Verification** — After modifying code, use brepl to call the affected functions directly. If the output is a massive data structure, summarize the key changes for the session instead of printing the whole thing.
+
 ## Code Style
 
 - Formatting: cljfmt with `{:parallel? true, :sort-ns-references? true, :function-arguments-indentation :cursive}` (see `.cljfmt.edn`)
