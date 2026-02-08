@@ -14,7 +14,7 @@
                 (clojure "-P"))}
 
   clj-repl {:doc "Run built-in Clojure REPL"
-            :task (shell "clj -A:dev:test")}
+            :task (shell "clj -A:dev:test:nrepl")}
 
   fmt-check {:doc "Check code formatting"
              :task (shell "cljfmt" "check")}
@@ -24,7 +24,7 @@
 
   lint-init {:doc "Linting project's classpath"
              :task (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs"
-                     "--lint" (with-out-str (clojure "-Spath")))}
+                          "--lint" (with-out-str (clojure "-Spath")))}
 
   lint {:doc "Linting project's code"
         :task (shell "clj-kondo" "--parallel" "--lint" "src" "test")}
