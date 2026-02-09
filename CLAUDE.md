@@ -39,7 +39,9 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 
 **Request flow:** `routes.clj` (route definitions) → `handlers.clj` (request handlers) → `views.clj` (Hiccup templates). The server middleware stack in `server.clj` includes CSRF protection, session management, content negotiation, and Malli coercion. The `reitit-extras/wrap-context` middleware injects the Integrant context (including `:db` datasource) into every request, so handlers access the DB via the request map (e.g. `(:db request)`).
 
-**Database:** `db.clj` provides `exec!` and `exec-one!` helpers that use HoneySQL for query building and next.jdbc for execution. Results are returned as unqualified kebab-case maps.
+**Database:** `db.clj` provides `exec!` and `exec-one!` helpers that use HoneySQL for query building and next.jdbc for execution. Results are returned as unqualified kebab-case maps. **Important:** `db/exec!` and `db/exec-one!` only accept HoneySQL maps (e.g. `{:select [:*] :from [:users]}`), NOT raw SQL strings. For raw SQL, use `next.jdbc/execute!` directly (e.g. `(jdbc/execute! ds ["SELECT * FROM sqlite_master"])`).
+
+**Accessing the datasource in brepl:** Get it from the running Integrant system: `(:my-project.db/db integrant.repl.state/system)`. The dev system also includes `:integrant-extras.process/process` for managed subprocesses (e.g. `bb css-watch`).
 
 **Dev hot-reload:** In dev mode, `wrap-reload` in `server.clj` re-creates the Reitit router from the `my-project.routes/routes` var on every request. This means editing handler/route source files takes effect immediately — no server restart needed. You can also use `alter-var-root` on the routes var via nREPL/brepl for live changes (nREPL port is in `.nrepl-port`).
 
@@ -54,6 +56,12 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 - **Debugging** — When investigating a bug, use brepl to explore state before modifying code: check `*e` for the last exception, call functions directly to inspect return values and data shapes, query the DB with `(db/exec! ds ...)`, and inspect the Integrant system via `integrant.repl.state/system`.
 - **Exploration** — When working with unfamiliar code, use brepl to call `(doc fn-name)`, `(source fn-name)`, or invoke functions directly to understand behavior, rather than relying only on reading source files.
 - **Live system operations** — Use brepl for tasks like inserting test data, running migrations, or checking connection pool status against the running dev system.
+
+### Interactive Development Techniques
+
+- **Call handlers directly** — Ring handlers are pure functions (request map → response map). Test them in brepl without going through HTTP or middleware: `(handlers/home-handler {})`, `(handlers/inspect-handler {})`. Inspect response structure with `(keys resp)` before dumping the full body.
+- **Verify routes with Reitit** — Use `reitit.core/match-by-path` to check route matching interactively without a browser: `(reitit.core/match-by-path (reitit.ring/router app-routes/routes) "/")`. Useful for verifying newly added routes before integration testing.
+- **Compose and inspect HoneySQL queries** — Build queries incrementally as data and preview the generated SQL with `(honey.sql/format query {:quoted true})` before sending to the database. This lets you verify correctness without executing against the DB.
 
 ### Balanced REPL Exploration (Token Optimization)
 
