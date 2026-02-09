@@ -51,23 +51,19 @@ Tools are managed via [mise](https://mise.jdx.dev/) (see `.mise.toml`): Java (Te
 
 ## Dev Workflow
 
-- The nREPL is usually running during development. Prefer using brepl to verify changes — reload the namespace and call the handler directly to confirm behavior.
 - After editing source files, use brepl to `require` the changed namespace with `:reload` and test interactively, rather than relying solely on `curl` or `bb test`.
-- **Debugging** — When investigating a bug, use brepl to explore state before modifying code: check `*e` for the last exception, call functions directly to inspect return values and data shapes, query the DB with `(db/exec! ds ...)`, and inspect the Integrant system via `integrant.repl.state/system`.
-- **Exploration** — When working with unfamiliar code, use brepl to call `(doc fn-name)`, `(source fn-name)`, or invoke functions directly to understand behavior, rather than relying only on reading source files.
-- **Live system operations** — Use brepl for tasks like inserting test data, running migrations, or checking connection pool status against the running dev system.
 
 ### Interactive Development Techniques
 
 - **Call handlers directly** — Ring handlers are pure functions (request map → response map). Test them in brepl without going through HTTP or middleware: `(handlers/home-handler {})`, `(handlers/inspect-handler {})`. Inspect response structure with `(keys resp)` before dumping the full body.
 - **Verify routes with Reitit** — Use `reitit.core/match-by-path` to check route matching interactively without a browser: `(reitit.core/match-by-path (reitit.ring/router app-routes/routes) "/")`. Useful for verifying newly added routes before integration testing.
 - **Compose and inspect HoneySQL queries** — Build queries incrementally as data and preview the generated SQL with `(honey.sql/format query {:quoted true})` before sending to the database. This lets you verify correctness without executing against the DB.
+- **Debugging** — When investigating a bug, start with `(ex-message *e)` and `(ex-data *e)`, only use `(clojure.repl/pst 10)` if the root cause remains hidden. Call functions directly to inspect return values, query the DB with `(db/exec! ds ...)`, and check the Integrant system via `(keys integrant.repl.state/system)`.
 
 ### Balanced REPL Exploration (Token Optimization)
 
-- **Incremental Inspection** — Always start with low-token queries: use `(keys ...)` to see structure, `(count ...)` for size, or `(take 5 ...)` for samples. 
+- **Incremental Inspection** — Always start with low-token queries: use `(keys ...)` to see structure, `(count ...)` for size, or `(take 5 ...)` for samples.
 - **Escalation Path** — If sampling is insufficient to diagnose the issue, you are encouraged to retrieve specific nested data or full objects, but do so purposefully (e.g., `(get-in ...)`).
-- **Efficient Debugging** — Start with `(ex-message *e)` and `(ex-data *e)`. Only dump a truncated stack trace with `(clojure.repl/pst 10)` if the root cause remains hidden.
 - **State Verification** — After modifying code, use brepl to call the affected functions directly. If the output is a massive data structure, summarize the key changes for the session instead of printing the whole thing.
 
 ## Code Style
